@@ -6,17 +6,17 @@
     <div class="col-sm-3">
       <p class="lead">Coonstagram</p>
       <div class="list-group">
-        <li class="list-group-item active">Info</li>
-        <li class="list-group-item">Info</li>
-        <li class="list-group-item">Info</li>
-        <li class="list-group-item">Info</li>
+        <li class="list-group-item active">Photo info</li>
+        <li class="list-group-item">Add to my favorite</li>
+        <li class="list-group-item">Follow</li>
+        <li class="list-group-item">Author's profile</li>
       </div>
     </div>
     <div class="col-sm-9">
       <div class="thumbnail">
         <img class="img-responsive" src="<%= photo.image%>">
         <div class="caption-full">
-          <h4 class="pull-right"><%=photo.created.toDateString()%></h4>
+          <h4 class="pull-right"><%=moment(photo.created).fromNow()%></h4>
           <h4><a href="#"><%= photo.name%></a></h4>
           <p><%= photo.description%></p>
           <p>
@@ -41,14 +41,14 @@
             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New Comment
           </a>
         </div>
-        <hr>
+        <br><hr>
       <%photo.comments.forEach((comment)=>{%>
         <div class="row">
           <div class="col-md-12">
             <strong>
               <a href="/users/<%=comment.author.id%>"><%=comment.author.username%></a>
             </strong>
-            <span class="pull-right"><%=comment.created.toDateString()%></span>
+            <span class="pull-right"><%=moment(comment.created).fromNow()%></span>
             <p><%=comment.text%></p>
           <% if (currentUser && (comment.author.id.equals(currentUser._id) || currentUser.isAdmin) ) { -%>
             <a href="/photos/<%=photo._id%>/comments/<%=comment._id%>/edit" class="btn btn-xs btn-warning">Edit</a>

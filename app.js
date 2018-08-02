@@ -33,6 +33,8 @@ app.use(flash());
 
 // seedDB();  // Seed the database
 
+app.locals.moment = require("moment");
+
 // PASSPORT CONFIGURATION
 app.use(expressSession({
     secret: "Yelp Yelp",

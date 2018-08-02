@@ -72,7 +72,7 @@ async function seedDB(){
     let user = null;
 
     try{
-        user = await createUser("root", "root", "hasaki_kitten@outlook.com", true);
+        user = await createUser("root", "root", "yanghuai2012@outlook.com", true);
         console.log("Root user created");
         anotherUser = await createUser("gd", "123", "hyangzju@gmail.com"); //dummy user for testing
     } catch(err){

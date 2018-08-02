@@ -11,12 +11,12 @@
         <div class="row">
           <div class="col-md-12">
             <strong><%=comment.author.username%></strong>
-            <span class="pull-right"><%=comment.created.toDateString()%></span>
+            <span class="pull-right"><%=moment(comment.created).fromNow()%></span>
             <p><%=comment.text%></p> 
           </div>
         </div>
       <%})%>
-        <div class="well" style="border-left: 5px solid green">
+        <div class="well comment-editor">
           <h4>Write your comment <span class="glyphicon glyphicon-pencil"></span></h4>
           <form action="/photos/<%=photo._id%>/comments" method="POST" id="add-comment-form">
             <div class="form-group">

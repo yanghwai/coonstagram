@@ -45,8 +45,8 @@ let comment = {
 };
 
 
-function createUser(username, password, isAdmin){
-    let newUser = new User({username: username, isAdmin: isAdmin});
+function createUser(username, password, email, isAdmin=false){
+    let newUser = new User({username: username, email: email, isAdmin: isAdmin});
     return new Promise((resolve, reject) => {
         User.register(newUser, password, (err, user)=>{
             if(err){
@@ -72,8 +72,9 @@ async function seedDB(){
     let user = null;
 
     try{
-        user = await createUser("root", "root", true);
+        user = await createUser("root", "root", "hasaki_kitten@outlook.com", true);
         console.log("Root user created");
+        anotherUser = await createUser("gd", "123", "hyangzju@gmail.com"); //dummy user for testing
     } catch(err){
         console.log(err);
         return;

@@ -12,6 +12,7 @@
 
 body{
     padding-top: 70px;
+    font-family: 'Lato', sans-serif;
 }
 
 .navbar-inverse{
@@ -24,4 +25,13 @@ body{
 
 .navbar-inverse .navbar-brand{
     color: white;
+}
+
+.flex{
+    display: flex;
+    flex-wrap: wrap
+}
+
+.jumbotron{
+    text-transform: capitalize;
 }

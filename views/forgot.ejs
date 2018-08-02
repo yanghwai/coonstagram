@@ -1,0 +1,17 @@
+<%include ./partials/header%>
+<%include ./partials/message%>
+
+<div class="container">
+  <h3>Reset your password</h3>
+  <form action="/forgot" method="POST">
+    <div class="form-group">
+      <label>
+        Email <input type="email" name="email" autofocus class="form-control">
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary">Reset Password</button>
+  </form>
+</div>
+
+
+<%include ./partials/footer%>

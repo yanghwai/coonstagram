@@ -3,7 +3,7 @@
 
 <div class="container">
     <header class="jumbotron">
-        <h1>Welcome to Coonstagram</h1>
+        <h1><span class="glyphicon glyphicon-camera"></span> Welcome to Coonstagram</h1>
         <p>View all trending photos from all over the world!</p>
         <p>
             <a href="/photos/new">
@@ -12,9 +12,9 @@
         </p>
     </header>
 
-    <div class="row text-center" style="display: flex; flex-wrap: wrap;">
+    <div class="row text-center flex">
     <% for (var i = 0; i < photos.length; i++) { -%>
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-4 col-sm-6">
             <div class="thumbnail">
                 <img src="<%=photos[i].image%>">
                 <div class="caption">

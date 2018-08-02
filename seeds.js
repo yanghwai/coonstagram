@@ -60,13 +60,13 @@ function createUser(username, password, email, isAdmin=false){
 }
 
 async function seedDB(){
-    await Photo.remove({}).exec();
+    await Photo.remove({});
     console.log("Photos removed");
     
-    await Comment.remove({}).exec();
+    await Comment.remove({});
     console.log("Comments removed");
 
-    await User.remove({}).exec();
+    await User.remove({});
     console.log("Users removed");
 
     let user = null;
@@ -96,7 +96,7 @@ async function seedDB(){
 
         thePhoto.comments.push(theComment);
 
-        thePhoto = await thePhoto.save();
+        await thePhoto.save();
         console.log("Added comments to photos");
     });
 

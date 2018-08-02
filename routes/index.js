@@ -1,9 +1,8 @@
 const express = require("express"),
       router = express.Router(),
       passport = require("passport"),
-      async = require("async"),
       nodemailer = require("nodemailer"),
-      crypto = require("crypto");
+      crypto = require("crypto-promise");
 
 
 const User = require("../models/user"),
@@ -107,113 +106,119 @@ router.get("/forgot", (req, res)=>{
 
 
 // Process password reset
-router.post("/forgot", async(req, res, next) =>{
-    let generateToken = function(done){
-        crypto.randomBytes(20, (err, buf)=>{
-            let token = buf.toString('hex');
-            done(err, token);
-        });
-    };
+router.post("/forgot", async(req, res) =>{
 
-    let appendUser = function(token, done){
+    const randb = await crypto.randomBytes(20)
+    let token = randb.toString("hex");
+
+    // Find user by email and add token with expirary time to it
+    try{
+        let user = await User.findOne({email: req.body.email}).exec();
+        if(!user){
+            req.flash("danger", "No account with that email address exists.");
+            return res.redirect('/forgot');           
+        }
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour in ms
         
-        User.findOne({email: req.body.email}, (err, user)=>{
-            if(!user){
-                req.flash("danger", "No account with that email address exists.");
-                return res.redirect('/forgot');                
-            }
+        await user.save();
 
-            user.resetPasswordToken = token;
-            user.resetPasswordExpires = Date.now() + 3600000; // 1 hour in ms
-            
-            user.save(err=>{
-                done(err, token, user);
-            });
-        });    
-    };
+        const subject = "Coonstagram Password Reset Email";
+        const text =  "You are receiving this email because a password reset request has been made. Please click on the following link or paste it in to your browser to complete the process.\n\n" + "http://" + req.headers.host + "/reset/" + token + "\n\n" + "If you didn't request this, please ignore this email.\n";
+        
+        await sendEmail(user.email, subject, text);
+        console.log("Reset email sent");
+        req.flash('success', "An email has been setn to "+ user.email + " with further instructions.");
 
-    let sendEmail = function(token, user, done){
-        const mailOptions = {
-            to: user.email,
-            from: mailSetting.user,
-            subject: "Coonstagram Password Reset Email",
-            text: "You are receiving this email because a password reset request has been made. Please click on the following link or paste it in to your browser to complete the process.\n\n" + "http://" + req.headers.host + "/reset/" + token + "\n\n" + "If you didn't request this, please ignore this email.\n"
-        };
-
-        smtpTransport.sendMail(mailOptions, (err)=>{
-            console.log("mail sent");
-            req.flash('success', "An email has been setn to "+ user.email + " with further instructions.");
-            done(err,'done');
-        });
-    };
-
-    async.waterfall([generateToken, appendUser, sendEmail], (err)=>{
-        if(err)
-            return next(err);
         res.redirect('/forgot');
-    });
+
+    } catch(err){
+        console.log(err);
+        res.redirect("back");
+    }
 });
 
 
 // Show the page for password reset
-router.get("/reset/:token",  (req, res)=>{
-    User.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: {$gt: Date.now()}}, (err,user)=>{
+router.get("/reset/:token",  async(req, res)=>{
+    try{
+        let user = await User.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: {$gt: Date.now()}}).exec();
+
         if(!user){
             req.flash("danger", "Password reset token is invalid or has expired.");
             return res.redirect('/forgot');
         }
+
         res.render('reset', {token: req.params.token});
-    });
+    }catch(err){
+        console.log(err);
+        res.redirect('back');
+    }
+    
 });
 
 
 // Process the passwrod reset
-router.post("/reset/:token", (req, res)=>{
+router.post("/reset/:token", async(req, res)=>{
 
-    function checkValidity(done) {
-        User.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: {$gt: Date.now()}}, (err,user)=>{
-            if(!user){
-                req.flash("danger", "Password reset token is invalid or has expired.");
-                return res.redirect('back');
-            }
-            if(req.params.password !== req.params.confirm){
-                req.flash("danger", "Passwords do not match.");
-                return res.redirect("back");
-            }
+    try{
+        let user = await User.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: {$gt: Date.now()}}).exec();
+        if(!user){
+            req.flash("danger", "Password reset token is invalid or has expired.");
+            return res.redirect('back');            
+        }
 
-            user.setPassword(req.body.password, (err)=>{
-                user.resetPasswordToken = undefined;
-                user.resetPasswordExpires = undefined;
+        // Confirm password
+        if(req.body.password !== req.body.confirm){
+            req.flash("danger", "Passwords do not match.");
+            return res.redirect("back");
+        }
 
-                user.save(err=>{
-                    req.logIn(user, err=>{
-                        done(err, user);
-                    });
-                });
-            });
+        await user.setPassword(req.body.password); 
 
-        });
+
+        // Set token invalid
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+
+        await user.save();
+
+        // Automatic login after resetting password
+        req.logIn(user, err=> console.log(err));
+
+    
+        const subject = "Your password has been changed";
+        const text = "Hello. This is a confirmation that your password has been changed.\n";
+
+        await sendEmail(user.email, subject, text);
+        console.log("Confirmation email sent");
+        req.flash('success', "Your password has been changed.");
+        res.redirect('/photos')
+
+    } catch(err){
+        console.log(err);
+        res.redirect("back");
     }
 
-    function sendConfirmation(user, done){
-        const mailOptions = {
-            to: user.email,
-            from: mailSetting.user,
-            subject: "Your password has been changed",
-            text: "Hello. This is a confirmation that your password has been changed.\n"
-        };
-
-        smtpTransport.sendMail(mailOptions, (err)=>{
-            console.log("mail sent");
-            req.flash('success', "Your password has been changed.");
-            done(err);
-        });
-    }
-
-    async.waterfall([checkValidity, sendConfirmation], err=> res.redirect('/photos'));
 });
 
 
+function sendEmail(to, subject, text){
+    const mailOptions = {
+        to: to,
+        from: mailSetting.user,
+        subject: subject,
+        text: text
+    };
 
+    return new Promise((resolve, reject)=>{
+        smtpTransport.sendMail(mailOptions, (err)=>{
+            if(err)
+                reject(err);
+            else
+                resolve();
+        });            
+    });
+};
 
 module.exports = router;

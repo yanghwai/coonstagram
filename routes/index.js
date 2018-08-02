@@ -1,7 +1,8 @@
 const express = require("express"),
       router = express.Router(),
       passport = require("passport"),
-      User = require("../models/user");
+      User = require("../models/user"),
+      Photo = require("../models/photo");
 
 
 // ROOT route
@@ -17,9 +18,16 @@ router.get("/register", (req, res)=>{
 
 // Process sign up 
 router.post("/register", (req, res)=>{
-    let newUser = new User({username: req.body.username});
+    let newUser = new User(
+        {
+            username: req.body.username,
+             email: req.body.email
+         });
+
+    // eval(require('locus'));
     User.register(newUser, req.body.password, (err, user)=>{
         if(err){
+            console.log(err);
             req.flash("warning", err.message);
             res.redirect("/register");
             return;
@@ -54,6 +62,24 @@ router.get("/logout", (req, res)=>{
     req.flash("success", "You have logged out.");
     res.redirect("back");
 });
+
+
+// SHOW - Display user profile
+router.get("/users/:userId", async (req, res)=>{
+    try{
+        let theUser = await User.findById(req.params.userId).exec();
+
+        let photoList = await Photo.find().where('author.id').equals(theUser._id).exec();
+
+        res.render("users/show", {user: theUser, photoList: photoList});
+
+    }catch(err){
+        req.flash("danger", "User not found.");
+        res.redirect("back");
+    }
+    
+});
+
 
 
 

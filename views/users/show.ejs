@@ -12,18 +12,58 @@
     </div>
   </div>
   <hr>
-  <div class="row">
-    <h2><%=user.username%>'s Photos</h2>
+  <h2><%=user.username%>'s Photos</h2>
+  <div class="row text-center flex">
   <% photoList.forEach( photo => {%>
     <div class="col-md-3 col-sm-4 col-xs-6">
       <div class="thumbnail">
-        <a href="/photos/<%= photo._id %>"><img src="<%=photo.image%>"></a>
+        <a href="/photos/<%= photo._id %>">
+          <img src="<%=photo.image%>">
+        </a>
         <div class="caption">
             <h4><%=photo.name%></h4>
         </div>
       </div>
     </div>
   <%});%>
+  </div>
+  <div class="row text-center">
+    <% if (pages && pages>0) { -%>
+      <ul class="pagination text-center">
+      <% if (current == 1) { -%>
+        <li class="disabled"><a>First</a></li>
+        <li class="disabled"><a>Prev</a></li>
+      <% } else { -%>
+        <li><a href="/users/<%=user._id%>">First</a></li>
+        <li><a href="/users/<%=user._id%>?page=<%=parseInt(current)-1%>">Prev</a></li>
+      <% } -%>
+      
+      <%let i = Math.max(parseInt(current)-4, 1);%>
+      <% if (i!==1) { -%>
+        <li class="disabled"><a>...</a></li>
+      <% } -%>
+        
+      <% for (; i <= parseInt(current)+4 && i<=pages; i++) { -%>
+        <% if (i==parseInt(current)) { -%>
+          <li class="active"><a><%=i%></a></li>
+        <% } else { -%>
+          <li><a href="/users/<%=user._id%>?page=<%=i%>"><%=i%></a></li>
+        <% } -%>
+        <% if (i == parseInt(current)+4 && i<pages) { -%>
+          <li class="disabled"><a>...</a></li>
+        <% } -%>
+      <% } -%>
+
+      <% if (current == pages) { -%>
+        <li class="disabled"><a>Next</a></li>
+        <li class="disabled"><a>Last</a></li>
+      <% } else { -%>
+        <li><a href="/users/<%=user._id%>?page=<%=parseInt(current)+1%>">Next</a></li>
+        <li><a href="/users/<%=user._id%>?page=<%=pages%>">Last</a></li>
+      <% } -%>
+        
+      </ul>
+    <% } -%>
   </div>
 </div>
 

@@ -9,16 +9,24 @@ const isLoggedIn = middleware.isLoggedIn,
 
 
 // 1.INDEX - show all photos
-router.get("/", (req, res) =>{
-    // Get all photos from DB
-    Photo.find({}, (err, data)=>{
-        if(err){
-            console.log(err);
-        }
-        else{
-            res.render("photos/index", {photos: data});
-        }
-    });
+router.get("/", async(req, res) =>{
+    let perPage = 8;
+    let pageQuery = parseInt(req.query.page);
+    let pageNumber = pageQuery? pageQuery:1;
+
+    try{
+        let count = await Photo.countDocuments().exec();
+        let allPhotos = await Photo.find({}).skip(perPage*(pageNumber-1)).limit(perPage).exec();
+
+        res.render("photos/index",{
+            photos: allPhotos,
+            current: pageNumber,
+            pages: Math.ceil(count/perPage)
+        });
+
+    } catch(err){
+        console.log(err);
+    }
 });
 
 

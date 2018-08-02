@@ -83,14 +83,27 @@ router.get("/logout", (req, res)=>{
 
 // SHOW - Display user profile
 router.get("/users/:userId", async (req, res)=>{
+
+    let perPage = 9;
+    let pageQuery= parseInt(req.query.page);
+    let pageNumber = pageQuery? pageQuery: 1;
+
     try{
         let theUser = await User.findById(req.params.userId).exec();
+        let count = await Photo.countDocuments().exec();
+        let photoList = await Photo.find().where('author.id').equals(theUser._id)
+                                          .skip(perPage*(pageNumber-1)).limit(perPage)
+                                          .exec();
 
-        let photoList = await Photo.find().where('author.id').equals(theUser._id).exec();
-
-        res.render("users/show", {user: theUser, photoList: photoList});
+        res.render("users/show", {
+            user: theUser, 
+            photoList: photoList,
+            pages: Math.ceil(count/perPage),
+            current: pageNumber
+        });
 
     }catch(err){
+        console.log(err);
         req.flash("danger", "User not found.");
         res.redirect("back");
     }

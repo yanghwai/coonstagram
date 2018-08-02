@@ -14,7 +14,7 @@
 
     <div class="row text-center flex">
     <% for (var i = 0; i < photos.length; i++) { -%>
-        <div class="col-md-4 col-sm-6">
+        <div class="col-md-3 col-sm-6 photo">
             <div class="thumbnail">
                 <img src="<%=photos[i].image%>">
                 <div class="caption">
@@ -30,6 +30,44 @@
     <% } -%>
     </div>
 
+    <div class="row text-center">
+      <% if (pages && pages>0) { -%>
+        <ul class="pagination text-center">
+        <% if (current == 1) { -%>
+          <li class="disabled"><a>First</a></li>
+          <li class="disabled"><a>Prev</a></li>
+        <% } else { -%>
+          <li><a href="/photos">First</a></li>
+          <li><a href="/photos?page=<%=parseInt(current)-1%>">Prev</a></li>
+        <% } -%>
+        
+        <%let i = Math.max(parseInt(current)-4, 1);%>
+        <% if (i!==1) { -%>
+          <li class="disabled"><a>...</a></li>
+        <% } -%>
+          
+        <% for (; i <= parseInt(current)+4 && i<=pages; i++) { -%>
+          <% if (i==parseInt(current)) { -%>
+            <li class="active"><a><%=i%></a></li>
+          <% } else { -%>
+            <li><a href="/photos?page=<%=i%>"><%=i%></a></li>
+          <% } -%>
+          <% if (i == parseInt(current)+4 && i<pages) { -%>
+            <li class="disabled"><a>...</a></li>
+          <% } -%>
+        <% } -%>
+
+        <% if (current == pages) { -%>
+          <li class="disabled"><a>Next</a></li>
+          <li class="disabled"><a>Last</a></li>
+        <% } else { -%>
+          <li><a href="/photos?page=<%=parseInt(current)+1%>">Next</a></li>
+          <li><a href="/photos?page=<%=pages%>">Last</a></li>
+        <% } -%>
+          
+        </ul>
+      <% } -%>
+    </div>
 </div>
 
 <%include ../partials/footer%>

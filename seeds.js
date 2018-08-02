@@ -32,7 +32,39 @@ let data = [
             username: "huai"
         },
         description: "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
-    }
+    },
+    {
+        name: "Cat with orange",
+        image: "https://i.imgur.com/xfT51uO.png",
+        author:{id: null, username: null},
+        description: "asdasd"
+    },
+
+    {
+        name: "Edibles",
+        image: "https://i.imgur.com/wKhr9aR.jpg",
+        author:{id: null, username: null},
+        description: "12345"
+    },
+    {
+        name: "2006 as far as 2030",
+        image: "https://i.imgur.com/rOZdYfj.jpg",
+        author:{id: null, username: null},
+        description: "mind blown"
+    },
+    {
+        name: "Eraser",
+        image: "https://i.imgur.com/TajT1da.jpg",
+        author:{id: null, username: null},
+        description: "for big mistakes"
+    },
+    {
+        name: "Fat cat",
+        image: "https://i.imgur.com/5aZ4RYG.jpg",
+        author:{id: null, username: null},
+        description: "more dinner"
+    },
+   
 ]
 
 
@@ -83,6 +115,7 @@ async function seedDB(){
     comment.author.id = user._id;
     comment.author.username = user.username;
 
+
     data.forEach(async seed=>{
         seed.author.id = user._id;
         seed.author.username = user.username;
@@ -99,6 +132,25 @@ async function seedDB(){
         await thePhoto.save();
         console.log("Added comments to photos");
     });
+
+    // seed again
+    for(let i=data.length-1; i>=0; i--){
+        let seed = data[i];
+        seed.author.id = anotherUser._id;
+        seed.author.username = anotherUser.username;
+
+        let thePhoto = await Photo.create(seed);
+
+        console.log("Photos created");
+
+        let theComment = await Comment.create(comment);
+        console.log("Comments created");
+
+        thePhoto.comments.push(theComment);
+
+        await thePhoto.save();
+        console.log("Added comments to photos");        
+    }
 
 }
  

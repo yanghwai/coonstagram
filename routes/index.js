@@ -12,7 +12,6 @@ const User = require("../models/user"),
 const mailSetting = require("../setting");
 
 
-
 const smtpTransport = nodemailer.createTransport({
     service: 'Gmail',
     auth:{

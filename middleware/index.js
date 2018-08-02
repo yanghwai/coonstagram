@@ -25,7 +25,7 @@ middlewareObj.checkPhotoOwnership = function(req, res, next){
             }
             else{
                 // does user own the photo?
-                if(foundPhoto.author.id.equals(req.user._id)){
+                if(req.user.isAdmin || foundPhoto.author.id.equals(req.user._id)){
                     next();
                 }
                 else{
@@ -51,7 +51,7 @@ middlewareObj.checkCommentOwnership = function(req, res, next){
             }
             else{
                 // does user own the comment?
-                if(theComment.author.id.equals(req.user._id)){
+                if(req.user.isAdmin || theComment.author.id.equals(req.user._id)){
                     next();
                 }
                 else{

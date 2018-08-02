@@ -21,7 +21,7 @@
           <p><%= photo.description%></p>
           <p><em>Uploaded By <%=photo.author.username%></em></p>
 
-        <% if (currentUser && photo.author.id.equals(currentUser._id)) { -%>
+        <% if (currentUser && (photo.author.id.equals(currentUser._id) || currentUser.isAdmin )) { -%>
           <a href="/photos/<%=photo._id%>/edit" class="btn btn-sm btn-warning">Edit</a>
           <form class="delete-form" action="/photos/<%=photo._id%>?_method=DELETE" method="POST">
             <button class="btn btn-sm btn-danger">Delete</button>
@@ -43,7 +43,7 @@
             <strong><%=comment.author.username%></strong>
             <span class="pull-right"><%=comment.created.toDateString()%></span>
             <p><%=comment.text%></p>
-          <% if (currentUser && comment.author.id.equals(currentUser._id)) { -%>
+          <% if (currentUser && (comment.author.id.equals(currentUser._id) || currentUser.isAdmin) ) { -%>
             <a href="/photos/<%=photo._id%>/comments/<%=comment._id%>/edit" class="btn btn-xs btn-warning">Edit</a>
             <form class="delete-form" action="/photos/<%=photo._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">
               <button class="btn btn-xs btn-danger">Delete</button>

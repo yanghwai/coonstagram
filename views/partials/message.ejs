@@ -1,0 +1,16 @@
+<div class="container">
+<% if (message) { -%>
+  <% if (message.warning && message.warning.length>0) { -%>
+    <div class="alert alert-warning" role="alert"><%=message.warning%></div>   
+  <% } -%>
+  <% if (message.success && message.success.length>0) { -%>
+    <div class="alert alert-success" role="alert"><%=message.success%></div>   
+  <% } -%>
+  <% if (message.danger && message.danger.length>0) { -%>
+    <div class="alert alert-danger" role="alert"><%=message.danger%></div>   
+  <% } -%>
+  <% if (message.info && message.info.length>0) { -%>
+    <div class="alert alert-info" role="alert"><%=message.info%></div>   
+  <% } -%>
+<% } -%> 
+</div>

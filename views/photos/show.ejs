@@ -1,0 +1,61 @@
+<%include ../partials/header%>
+<%include ../partials/message%>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+      <p class="lead">Coonstagram</p>
+      <div class="list-group">
+        <li class="list-group-item active">Info</li>
+        <li class="list-group-item">Info</li>
+        <li class="list-group-item">Info</li>
+        <li class="list-group-item">Info</li>
+      </div>
+    </div>
+    <div class="col-md-9">
+      <div class="thumbnail">
+        <img class="img-responsive" src="<%= photo.image%>">
+        <div class="caption-full">
+          <h4 class="pull-right"><%=photo.created.toDateString()%></h4>
+          <h4><a href="#"><%= photo.name%></a></h4>
+          <p><%= photo.description%></p>
+          <p><em>Uploaded By <%=photo.author.username%></em></p>
+
+        <% if (currentUser && photo.author.id.equals(currentUser._id)) { -%>
+          <a href="/photos/<%=photo._id%>/edit" class="btn btn-sm btn-warning">Edit</a>
+          <form class="delete-form" action="/photos/<%=photo._id%>?_method=DELETE" method="POST">
+            <button class="btn btn-sm btn-danger">Delete</button>
+          </form>                        
+        <% } -%>
+        </div>
+      </div>
+
+      <div class="well">
+        <div class="text-right">
+          <a href="/photos/<%=photo._id%>/comments/new" class="btn btn-success pull-right">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New Comment
+          </a>
+        </div>
+        <hr>
+      <%photo.comments.forEach((comment)=>{%>
+        <div class="row">
+          <div class="col-md-12">
+            <strong><%=comment.author.username%></strong>
+            <span class="pull-right"><%=comment.created.toDateString()%></span>
+            <p><%=comment.text%></p>
+          <% if (currentUser && comment.author.id.equals(currentUser._id)) { -%>
+            <a href="/photos/<%=photo._id%>/comments/<%=comment._id%>/edit" class="btn btn-xs btn-warning">Edit</a>
+            <form class="delete-form" action="/photos/<%=photo._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">
+              <button class="btn btn-xs btn-danger">Delete</button>
+            </form>
+          <% } -%>    
+          </div>
+        </div>
+      <%})%>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<%include ../partials/footer%>

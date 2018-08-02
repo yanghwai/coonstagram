@@ -1,0 +1,35 @@
+<%include ../partials/header%>
+<%include ../partials/message%>
+
+<div class="container">
+    <header class="jumbotron">
+        <h1>Welcome to Coonstagram</h1>
+        <p>View all trending photos from all over the world!</p>
+        <p>
+            <a href="/photos/new">
+                <button class="btn btn-success btn-lg">Upload New Photo</button>
+            </a>
+        </p>
+    </header>
+
+    <div class="row text-center" style="display: flex; flex-wrap: wrap;">
+    <% for (var i = 0; i < photos.length; i++) { -%>
+        <div class="col-md-3 col-sm-6">
+            <div class="thumbnail">
+                <img src="<%=photos[i].image%>">
+                <div class="caption">
+                    <h4><%=photos[i].name%></h4>
+                </div>
+                <p>
+                    <a href="/photos/<%= photos[i]._id %>">
+                        <button class="btn btn-info">More Info</button>
+                    </a>
+                </p>
+            </div>
+        </div>
+    <% } -%>
+    </div>
+
+</div>
+
+<%include ../partials/footer%>

@@ -1,0 +1,29 @@
+<%include ../partials/header%>
+<%include ../partials/message%>
+
+<div class="container">
+    <div class="row">
+        <h1 style="text-align: center">Edit Photo</h1>
+        <div style="width: 30%; margin: 30px auto">
+            <form action="/photos/<%=photo._id%>?_method=PUT" method="POST">
+                <div class="form-group">
+                   <input class="form-control" type="text" name="photo[name]" value="<%=photo.name%>"> 
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="text" name="photo[image]" value="<%=photo.image%>">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="text" name="photo[description]" value="<%=photo.description%>">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">Update</button>
+                </div>                
+            </form>
+            <a href="/photos">Go Back</a>
+        </div>
+    </div>
+</div>
+
+
+
+<%include ../partials/footer%>

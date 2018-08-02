@@ -31,7 +31,7 @@ app.use(expressSanitizer());
 app.use(express.static(__dirname+"/public"));
 app.use(flash());
 
-seedDB();  // Seed the database
+// seedDB();  // Seed the database
 
 // PASSPORT CONFIGURATION
 app.use(expressSession({
@@ -62,7 +62,7 @@ app.use((req, res, next)=>{
 
 // Use routes
 app.use(indexRoutes);
-app.use("/photos", photoRoutes);
+app.use("/photos", photoRoutes); //common route prefix 
 app.use(commentRoutes);
 
 

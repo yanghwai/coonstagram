@@ -5,12 +5,13 @@
     <div class="row">
         <h1 style="text-align: center">Upload a New Photo</h1>
         <div style="width: 30%; margin: 30px auto">
-            <form action="/photos" method="POST">
+            <form action="/photos" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                    <input class="form-control" type="text" name="photo[name]" placeholder="name"> 
                 </div>
                 <div class="form-group">
-                    <input class="form-control" type="text" name="photo[image]" placeholder="url">
+                    <input type="file" id="image" name="image" accept="image/*" required>
+                    <!-- <input class="form-control" type="text" name="photo[image]" placeholder="url"> -->
                 </div>
                 <div class="form-group">
                     <input class="form-control" type="text" name="photo[description]" placeholder="description">

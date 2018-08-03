@@ -6,10 +6,18 @@
     <div class="col-sm-3">
       <p class="lead">Coonstagram</p>
       <div class="list-group">
-        <li class="list-group-item active">Photo info</li>
-        <li class="list-group-item">Add to my favorite</li>
-        <li class="list-group-item">Follow</li>
-        <li class="list-group-item">Author's profile</li>
+        <li class="list-group-item">
+          <span class="glyphicon glyphicon-thumbs-up"></span> Likes<span class="badge">14</span>
+        </li>
+        <li class="list-group-item">
+          <span class="glyphicon glyphicon-star-empty"></span> Favorites<span class="badge">50</span>
+        </li>
+        <a class="list-group-item" href="/photos/<%=photo._id%>/comments/new">
+          <span class="glyphicon glyphicon-comment"></span> Comments<span class="badge"><%=photo.comments.length%></span>
+        </li>
+        <a class="list-group-item list-group-item-info" href="/users/<%=photo.author.id%>">
+          <span class="glyphicon glyphicon-user"></span> Author's profile
+        </a>
       </div>
     </div>
     <div class="col-sm-9">
@@ -17,7 +25,7 @@
         <img class="img-responsive" src="<%= photo.image%>">
         <div class="caption-full">
           <h4 class="pull-right"><%=moment(photo.created).fromNow()%></h4>
-          <h4><a href="#"><%= photo.name%></a></h4>
+          <h4><%= photo.name%></h4>
           <p><%= photo.description%></p>
           <p>
             <em>Uploaded By 

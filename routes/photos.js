@@ -1,8 +1,36 @@
 const express = require("express"),
       router = express.Router(),
       Photo = require("../models/photo"),
-      middleware = require("../middleware"); //automatically require index.js in this folder
+      middleware = require("../middleware"), //automatically require index.js in this folder
+      multer = require("multer"),
+      cloudinary = require("cloudinary");
 
+
+require("dotenv").config();
+
+
+const storage = multer.diskStorage({
+    filename: function(req, file, callback){
+        callback(null, Date.now() + file.originalname);
+    }
+});
+
+const imageFilter = function(req, file, cb){
+    // accept image files only
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
+        return cb(new Error('Only image files are allowed!'), false);
+    }
+    cb(null, true);
+};
+
+const upload = multer({storage: storage, fileFilter: imageFilter});
+
+
+cloudinary.config({
+    cloud_name: 'dwf6x1ohn',
+    api_key: process.env.cloudinary_api_key,
+    api_secret: process.env.cloudinary_api_secret
+});
 
 const isLoggedIn = middleware.isLoggedIn,
       checkPhotoOwnership = middleware.checkPhotoOwnership;
@@ -37,23 +65,34 @@ router.get("/new", isLoggedIn,(req, res)=>{
 
 
 // 3.CREATE - add photo to DB
-router.post("/", isLoggedIn, (req, res) =>{
-    let newphoto = req.body.photo;
-    newphoto.author = {
-        id: req.user._id,
-        username: req.user.username
-    };
-
-    Photo.create(newphoto, (err, newData) =>{
+router.post("/", isLoggedIn, upload.single("image"), (req, res) =>{
+    cloudinary.v2.uploader.upload(req.file.path, (err,result)=>{
         if(err){
             console.log(err);
-        } else{
-            console.log("New photo created!");
-            console.log(newData);
-            req.flash("success", "Successfully uploaded!");
-            res.redirect("/photos");
+            req.flash("danger", err.message);
+            return res.redirect('back');
         }
+        // add cloudinary url for the image
+        let newPhoto = req.body.photo;
+        newPhoto.image = result.secure_url;
+        newPhoto.cloudId = result.public_id;
+        newPhoto.author = {
+            id: req.user._id,
+            username: req.user.username
+        };
+
+        Photo.create(newPhoto, (err, thePhoto) =>{
+            if(err){
+                console.log(err);
+                req.flash('danger', err.message);
+                return res.redirect('back');
+            } else{
+                req.flash("success", "Successfully uploaded!");
+                res.redirect("/photos/"+ thePhoto._id);
+            }
+        });        
     });
+
 });
 
 
@@ -90,15 +129,21 @@ router.put("/:id", checkPhotoOwnership, (req, res)=>{
 
 
 //7.DESTROY
-router.delete("/:id", checkPhotoOwnership, (req, res)=>{
-    Photo.findByIdAndRemove(req.params.id, (err)=>{
-        if(err){
-            res.send(err.message);
-        }
-        else{
-            res.redirect("/photos");
-        }
-    });
+router.delete("/:id", checkPhotoOwnership, async(req, res)=>{
+
+    try{
+        let thePhoto = await Photo.findById(req.params.id).exec();
+        if(thePhoto.cloudId)
+            await cloudinary.v2.uploader.destroy(thePhoto.cloudId); //remove from cloudinary
+        thePhoto.remove();
+        req.flash("success", "Photo successfully deleted!");
+        res.redirect("/photos");
+
+    } catch(err){
+        console.log(err);
+        req.flash("danger", err.message);
+        return res.redirect("back");
+    }
 });
 
 

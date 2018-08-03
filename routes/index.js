@@ -9,14 +9,16 @@ const User = require("../models/user"),
       Photo = require("../models/photo");
 
 
-const mailSetting = require("../setting");
+
+require('dotenv').config();
+
 
 
 const smtpTransport = nodemailer.createTransport({
     service: 'Gmail',
     auth:{
-        user: mailSetting.user,
-        pass: mailSetting.pass
+        user: process.env.nodemailer_user,
+        pass: process.env.nodemailer_password
     }
 });
 
@@ -90,7 +92,8 @@ router.get("/users/:userId", async (req, res)=>{
 
     try{
         let theUser = await User.findById(req.params.userId).exec();
-        let count = await Photo.countDocuments().exec();
+        let count = await Photo.countDocuments().where('author.id').equals(theUser._id)
+                                                .exec();
         let photoList = await Photo.find().where('author.id').equals(theUser._id)
                                           .skip(perPage*(pageNumber-1)).limit(perPage)
                                           .exec();
@@ -218,7 +221,7 @@ router.post("/reset/:token", async(req, res)=>{
 function sendEmail(to, subject, text){
     const mailOptions = {
         to: to,
-        from: mailSetting.user,
+        from: process.env.nodemailer_user,
         subject: subject,
         text: text
     };

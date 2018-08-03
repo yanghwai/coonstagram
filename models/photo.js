@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const photoSchema = new mongoose.Schema({
     name: String,
     image: String,
+    cloudId: String,
     description: String,
     author: {
         id: {

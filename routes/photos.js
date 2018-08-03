@@ -44,7 +44,9 @@ router.get("/", async(req, res) =>{
 
     try{
         let count = await Photo.countDocuments().exec();
-        let allPhotos = await Photo.find({}).skip(perPage*(pageNumber-1)).limit(perPage).exec();
+        let allPhotos = await Photo.find({}).sort("-created").skip(perPage*(pageNumber-1))
+                                            .limit(perPage)
+                                            .exec();
 
         res.render("photos/index",{
             photos: allPhotos,
@@ -99,7 +101,12 @@ router.post("/", isLoggedIn, upload.single("image"), (req, res) =>{
 // 4.SHOW - Shows info about one photo
 router.get("/:id", (req, res) => {
     // find the photo with the provided id
-    Photo.findById(req.params.id).populate("comments").exec((err, foundPhoto)=>{
+    Photo.findById(req.params.id)
+            .populate({
+                path: "comments",
+                options: {sort: {created: -1}}
+            })
+            .exec((err, foundPhoto)=>{
         res.render("photos/show", {photo: foundPhoto});
     });
 

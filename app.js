@@ -21,6 +21,9 @@ const photoRoutes = require("./routes/photos"),
       indexRoutes = require("./routes/index");
 
 
+require("dotenv").config();
+
+
 mongoose.connect("mongodb://localhost:27017/coonstagram",{useNewUrlParser: true});
 
 app.set("view engine", "ejs");
@@ -68,4 +71,4 @@ app.use("/photos", photoRoutes); //common route prefix
 app.use(commentRoutes);
 
 
-app.listen(3000, ()=>console.log("Coonstagram server started."));
+app.listen(process.env.PORT, process.env.IP, ()=>console.log("Coonstagram server started."));

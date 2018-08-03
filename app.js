@@ -24,7 +24,8 @@ const photoRoutes = require("./routes/photos"),
 require("dotenv").config();
 
 
-mongoose.connect("mongodb://localhost:27017/coonstagram",{useNewUrlParser: true});
+// mongoose.connect("mongodb://localhost:27017/coonstagram",{useNewUrlParser: true});
+mongoose.connect("mongodb://coondev:iamcoon1@ds111562.mlab.com:11562/coonstagram",{useNewUrlParser: true});
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended:true}));

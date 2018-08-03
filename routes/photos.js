@@ -15,6 +15,7 @@ const storage = multer.diskStorage({
     }
 });
 
+
 const imageFilter = function(req, file, cb){
     // accept image files only
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
@@ -99,16 +100,24 @@ router.post("/", isLoggedIn, upload.single("image"), (req, res) =>{
 
 
 // 4.SHOW - Shows info about one photo
-router.get("/:id", (req, res) => {
-    // find the photo with the provided id
-    Photo.findById(req.params.id)
-            .populate({
-                path: "comments",
-                options: {sort: {created: -1}}
-            })
-            .exec((err, foundPhoto)=>{
+router.get("/:id", async(req, res) => {
+
+    try{
+        // find the photo with the provided id
+        let foundPhoto = await Photo.findById(req.params.id)
+                                    .populate({
+                                        path: "comments",
+                                        options: {sort: {created: -1}}
+                                    })
+                                    .exec();
+
         res.render("photos/show", {photo: foundPhoto});
-    });
+
+    } catch(err){
+        console.log(err);
+        req.flash("warning", "Photo not found.");
+        return res.redirect("/photos");
+    }
 
 });
 

@@ -6,9 +6,15 @@
     <div class="col-sm-3">
       <p class="lead">Coonstagram</p>
       <div class="list-group">
-        <li class="list-group-item">
-          <span class="glyphicon glyphicon-thumbs-up"></span> Likes<span class="badge">14</span>
-        </li>
+
+      <% if (hasLiked) { -%>
+        <button class="list-group-item active" id="photo-like-button">  
+      <% } else { -%>
+        <button class="list-group-item" id="photo-like-button">
+      <% } -%>  
+          <span class="glyphicon glyphicon-thumbs-up"></span> Likes<span class="badge"><%=photo.likes.length%></span>
+        </button>
+      
         <li class="list-group-item">
           <span class="glyphicon glyphicon-star-empty"></span> Favorites<span class="badge">50</span>
         </li>
@@ -73,4 +79,8 @@
 </div>
 
 
+<form id="photo-like-form" action="/photos/<%=photo._id%>/like" method="POST" class="invis-form">
+</form>
+
+<script type="text/javascript" src="/js/photo-info.js" defer></script>
 <%include ../partials/footer%>

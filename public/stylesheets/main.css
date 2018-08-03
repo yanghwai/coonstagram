@@ -10,6 +10,10 @@
     display: inline;
 }
 
+.invis-form{
+    display: none;
+}
+
 body{
     padding-top: 70px;
     font-family: 'Lato', sans-serif;

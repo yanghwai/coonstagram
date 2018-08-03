@@ -1,9 +1,13 @@
 const express = require("express"),
       router = express.Router(),
-      Photo = require("../models/photo"),
       middleware = require("../middleware"), //automatically require index.js in this folder
       multer = require("multer"),
       cloudinary = require("cloudinary");
+
+
+// import models
+const Photo = require("../models/photo");
+      Like = require("../models/like");
 
 
 require("dotenv").config();
@@ -101,7 +105,6 @@ router.post("/", isLoggedIn, upload.single("image"), (req, res) =>{
 
 // 4.SHOW - Shows info about one photo
 router.get("/:id", async(req, res) => {
-
     try{
         // find the photo with the provided id
         let foundPhoto = await Photo.findById(req.params.id)
@@ -109,9 +112,21 @@ router.get("/:id", async(req, res) => {
                                         path: "comments",
                                         options: {sort: {created: -1}}
                                     })
+                                    .populate("likes")
                                     .exec();
 
-        res.render("photos/show", {photo: foundPhoto});
+        let hasLiked = false;
+        if(req.isAuthenticated())
+        {
+            for(let like of foundPhoto.likes){
+                if(like.byWhom.id.equals(req.user._id)){
+                    hasLiked = true;
+                    break;
+                }
+            }
+        }
+
+        res.render("photos/show", {photo: foundPhoto, hasLiked: hasLiked});
 
     } catch(err){
         console.log(err);
@@ -163,5 +178,40 @@ router.delete("/:id", checkPhotoOwnership, async(req, res)=>{
 });
 
 
+// ==============
+// Like Routes
+// ==============
+
+router.post("/:id/like", isLoggedIn, async(req, res)=>{
+    try{
+        let thePhoto = await Photo.findById(req.params.id)
+                                    .populate("likes")
+                                    .exec();
+
+        for(let like of thePhoto.likes){
+            if(like.byWhom.id.equals(req.user._id)){
+                like.remove();
+                return res.redirect("back");
+            }
+        }
+
+        let newLike = await Like.create({
+            byWhom:{
+                id: req.user._id,
+                username: req.user.username
+            }
+        });
+
+        thePhoto.likes.push(newLike);
+
+        thePhoto.save();
+        return res.redirect("back");
+
+    }catch(err){
+        console.log(err);
+        req.flash("danger", err.message);
+        return res.redirect("back");
+    }
+});
 
 module.exports = router;

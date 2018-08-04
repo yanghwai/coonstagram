@@ -7,16 +7,25 @@
       <p class="lead">Coonstagram</p>
       <div class="list-group">
       <% if (hasLiked) { -%>
-        <button class="list-group-item active" id="photo-like-button">  
+        <button class="list-group-item list-group-item-danger" id="photo-like-button">
+          <span class="glyphicon glyphicon-thumbs-up"></span> Likes<span class="badge"><%=photo.likeCount%></span>
+        </button>  
       <% } else { -%>
         <button class="list-group-item" id="photo-like-button">
-      <% } -%>  
           <span class="glyphicon glyphicon-thumbs-up"></span> Likes<span class="badge"><%=photo.likeCount%></span>
         </button>
+      <% } -%>
+
+      <% if (hasFavoured) { -%>
+        <button class="list-group-item list-group-item-success" id="photo-favour-button">
+          <span class="glyphicon glyphicon-star-empty"></span> Favourites<span class="badge"><%=photo.favourCount%></span>
+        </button>
+      <% } else { -%>
+        <button class="list-group-item" id="photo-favour-button">
+          <span class="glyphicon glyphicon-star-empty"></span> Favourites<span class="badge"><%=photo.favourCount%></span>
+        </button>        
+      <% } -%>
       
-        <li class="list-group-item">
-          <span class="glyphicon glyphicon-star-empty"></span> Favourites<span class="badge">50</span>
-        </li>
         <a class="list-group-item" href="/photos/<%=photo._id%>/comments/new">
           <span class="glyphicon glyphicon-comment"></span> Comments<span class="badge"><%=photo.comments.length%></span>
         </li>
@@ -84,6 +93,11 @@
 <form id="photo-like-form" action="/photos/<%=photo._id%>/like" method="POST" class="invis-form"></form>  
 <% } -%>
 
+<% if (hasFavoured) { -%>
+<form id="photo-favour-form" action="/photos/<%=photo._id%>/favourite?_method=DELETE" method="POST" class="invis-form"></form>   
+<% } else { -%>
+<form id="photo-favour-form" action="/photos/<%=photo._id%>/favourite" method="POST" class="invis-form"></form> 
+<% } -%>
 
 
 <script type="text/javascript" src="/js/photo-info.js" defer></script>

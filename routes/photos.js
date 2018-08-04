@@ -7,9 +7,7 @@ const express = require("express"),
 
 // import models
 const Profile = require("../models/profile"),
-      Photo = require("../models/photo"),
-      Like = require("../models/like"),
-      Favourite = require("../models/favourite");
+      Photo = require("../models/photo");
 
 
 
@@ -45,7 +43,7 @@ const isLoggedIn = middleware.isLoggedIn,
 
 
 // 1.INDEX - show all photos
-router.get("/", async(req, res) =>{
+router.get("/", async function showAllPhotos(req, res){
     let perPage = 8;
     let pageQuery = parseInt(req.query.page);
     let pageNumber = pageQuery? pageQuery:1;
@@ -75,7 +73,7 @@ router.get("/new", isLoggedIn,(req, res)=>{
 
 
 // 3.CREATE - add photo to DB
-router.post("/", isLoggedIn, upload.single("image"), (req, res) =>{
+router.post("/", isLoggedIn, upload.single("image"), function createPhoto(req, res){
     cloudinary.v2.uploader.upload(req.file.path, (err,result)=>{
         if(err){
             console.log(err);
@@ -107,7 +105,7 @@ router.post("/", isLoggedIn, upload.single("image"), (req, res) =>{
 
 
 // 4.SHOW - Shows info about one photo
-router.get("/:id", async(req, res) => {
+router.get("/:id", async function showPhotoInfo(req, res){
     try{
         // find the photo with the provided id
         let foundPhoto = await Photo.findById(req.params.id)
@@ -122,7 +120,8 @@ router.get("/:id", async(req, res) => {
         if(req.isAuthenticated())
         {
             let currentUserProfile = await Profile.findById(req.user.profile._id)
-                                                    .populate("likes").exec();
+                                                    .populate("likes")
+                                                    .populate("favourites").exec();
             // eval(require('locus'));
             for(let like of currentUserProfile.likes){
                 if(like.photoId.equals(req.params.id)){
@@ -131,12 +130,12 @@ router.get("/:id", async(req, res) => {
                 }
             }
 
-/*            for(let favour of currentUser.favourites){
+            for(let favour of currentUserProfile.favourites){
                 if(favour.photoId.equals(req.params.id)){
                     isFavoured = true;
                     break;
                 }
-            }*/
+            }
         }
 
         res.render("photos/show", {
@@ -155,7 +154,7 @@ router.get("/:id", async(req, res) => {
 
 
 // 5.EDIT
-router.get("/:id/edit", checkPhotoOwnership, (req, res)=>{
+router.get("/:id/edit", checkPhotoOwnership, function editPhoto(req, res){
     Photo.findById(req.params.id, (err, foundPhoto)=>{
         res.render("photos/edit", {photo: foundPhoto});
     });
@@ -163,101 +162,44 @@ router.get("/:id/edit", checkPhotoOwnership, (req, res)=>{
 
 
 // 6.UPDATE
-router.put("/:id", checkPhotoOwnership, (req, res)=>{
+router.put("/:id", checkPhotoOwnership, async function updatePhoto(req, res){
     // Find and update the photo
-    Photo.findByIdAndUpdate(req.params.id, req.body.photo, (err, updatedPhoto)=>{
-        if(err){
-            res.send(err.message);
-        }
-        else{
-            res.redirect("/photos/"+ req.params.id); // Redirect back to the show page
-        }
-    });
+    try{
+        await Photo.findByIdAndUpdate(req.params.id, req.body.photo).exec();
+        req.flash("success", "Successfully updated photo!");
+
+    } catch(err){
+        req.flash("danger", err.message);
+
+    } finally {
+        res.redirect("/photos/"+ req.params.id); // Redirect back to the show page
+    }
+
 });
 
 
 //7.DESTROY
-router.delete("/:id", checkPhotoOwnership, async(req, res)=>{
+router.delete("/:id", checkPhotoOwnership, async function deletePhoto(req, res){
 
     try{
         let thePhoto = await Photo.findById(req.params.id).exec();
         if(thePhoto.cloudId)
             await cloudinary.v2.uploader.destroy(thePhoto.cloudId); //remove from cloudinary
+
         thePhoto.remove();
         req.flash("success", "Photo successfully deleted!");
-        res.redirect("/photos");
 
     } catch(err){
         console.log(err);
         req.flash("danger", err.message);
-        return res.redirect("back");
+
+    } finally {
+        res.redirect("/photos");
     }
 });
 
 
-// ==========================
-// Like and Favourite Routes
-// ==========================
 
-// 1. CREATE Like route
-router.post("/:id/like", isLoggedIn, async(req, res)=>{
-    try{
-        let thePhoto = await Photo.findById(req.params.id).exec();
-        let currentUserProfile = await Profile.findById(req.user.profile._id)
-                                                .populate("likes").exec();
-
-        // Haven't liked the photo
-        let newLike = await Like.create({
-            userId: req.user._id,
-            photoId: thePhoto._id
-        });
-
-
-        thePhoto.likes.push(newLike);
-        thePhoto.likeCount++;
-        thePhoto.save();
-
-        currentUserProfile.likes.push(newLike);
-        currentUserProfile.save();
-        return res.redirect("back");
-
-    }catch(err){
-        console.log(err);
-        req.flash("danger", err.message);
-        return res.redirect("back");
-    }
-});
-
-
-// 2. DELETE Like route
-router.delete("/:id/like", isLoggedIn, async function deleteLike(req, res){
-    try{
-        let thePhoto = await Photo.findById(req.params.id).exec();
-        let currentUserProfile = await Profile.findById(req.user.profile._id)
-                                                .populate("likes").exec();
-
-        for(let like of currentUserProfile.likes){
-            if(like.photoId.equals(req.params.id)){
-                thePhoto.likes.pull(like._id);
-                thePhoto.likeCount--;
-                thePhoto.save();
-
-                currentUserProfile.likes.pull(like._id);
-                currentUserProfile.save();
-
-                like.remove();
-                break;
-            }
-        }
-
-        return res.redirect("back");
-
-    }catch(err){
-        console.log(err);
-        req.flash("danger", err.message);
-        return res.redirect("back");
-    }    
-});
 
 
 

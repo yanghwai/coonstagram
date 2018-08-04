@@ -9,9 +9,7 @@
 
 
 body{
-    background-color: black;
-    background-image: url('https://i.imgur.com/LS7cQye.jpg');
-    background-position: center;
+    background: black url('https://i.imgur.com/LS7cQye.jpg') center;
     background-size: cover;
     font-family: 'Lato', sans-serif;
     color: white;

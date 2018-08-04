@@ -4,7 +4,8 @@ const mongoose = require("mongoose"),
       Comment   = require("./models/comment"),
       User = require("./models/user"),
       Profile = require("./models/profile"),
-      Like = require("./models/like");
+      Like = require("./models/like"),
+      Favourite= require("./models/favourite");
 
 
 let data = [
@@ -80,8 +81,8 @@ let comment = {
 
 
 async function createUser(username, password, email, isAdmin=false){
-    let newProfile = await Profile.create({});
-    let newUser = new User({username: username, email: email, isAdmin: isAdmin, profile: newProfile});
+
+    let newUser = new User({username: username, email: email, isAdmin: isAdmin});
     return new Promise((resolve, reject) => {
         User.register(newUser, password, (err, user)=>{
             if(err){
@@ -102,6 +103,7 @@ async function seedDB1(){
     await User.remove({});
     await Like.remove({});
     await Profile.remove({});
+    await Favourite.remove({});
 
     let user = null;
 

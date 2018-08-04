@@ -18,7 +18,8 @@ const User = require("./models/user");
 // Require routes
 const photoRoutes = require("./routes/photos"),
       commentRoutes = require("./routes/comments"),
-      indexRoutes = require("./routes/index");
+      indexRoutes = require("./routes/index"),
+      likeAndFavourRoutes = require("./routes/likesAndFavourites");
 
 
 require("dotenv").config();
@@ -68,6 +69,7 @@ app.use((req, res, next)=>{
 app.use(indexRoutes);
 app.use("/photos", photoRoutes); //common route prefix 
 app.use(commentRoutes);
+app.use(likeAndFavourRoutes);
 
 
 app.listen(process.env.PORT, process.env.IP, ()=>console.log("Coonstagram server started."));

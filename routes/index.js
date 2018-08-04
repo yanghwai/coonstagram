@@ -40,7 +40,7 @@ router.post("/register", (req, res)=>{
     let newUser = new User(
         {
             username: req.body.username,
-             email: req.body.email
+            email: req.body.email
          });
 
     // eval(require('locus'));

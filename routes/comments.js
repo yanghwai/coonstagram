@@ -68,7 +68,13 @@ router.put("/photos/:id/comments/:commentId", checkCommentOwnership, async(req, 
 // 5.DESTROY
 router.delete("/photos/:id/comments/:commentId", checkCommentOwnership, async(req, res)=>{
     try{
-        await Comment.findByIdAndRemove(req.params.commentId).exec();
+        let thePhoto = await Photo.findById(req.params.id).exec();
+        let theComment = await Comment.findById(req.params.commentId).exec();
+
+        thePhoto.comments.pull(theComment._id);
+        thePhoto.save();
+
+        theComment.remove();
         req.flash("success", "Comment deleted.");
         res.redirect("/photos/"+ req.params.id);    
 

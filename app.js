@@ -33,7 +33,7 @@ app.use(expressSanitizer());
 app.use(express.static(__dirname+"/public"));
 app.use(flash());
 
-// seedDB();  // Seed the database
+seedDB();  // Seed the database
 
 app.locals.moment = require("moment");
 

@@ -2,7 +2,9 @@ const mongoose = require("mongoose"),
       passport = require("passport"),
       Photo = require("./models/photo"),
       Comment   = require("./models/comment"),
-      User = require("./models/user");
+      User = require("./models/user"),
+      Profile = require("./models/profile"),
+      Like = require("./models/like");
 
 
 let data = [
@@ -13,7 +15,7 @@ let data = [
             id: "5b600819ed2d5540c7bcac89",
             username: "gd"
         },
-        description: "consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+        description: " id est laborum"
     },
     {
         name: "Desert Mesa", 
@@ -22,7 +24,7 @@ let data = [
             id: "5b60078d9ea39a40839fc445",
             username: "huai"
         },
-        description: "Lorem ipsum dolor sit amet, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+        description: "voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
     },
     {
         name: "Canyon Floor", 
@@ -77,8 +79,9 @@ let comment = {
 };
 
 
-function createUser(username, password, email, isAdmin=false){
-    let newUser = new User({username: username, email: email, isAdmin: isAdmin});
+async function createUser(username, password, email, isAdmin=false){
+    let newProfile = await Profile.create({});
+    let newUser = new User({username: username, email: email, isAdmin: isAdmin, profile: newProfile});
     return new Promise((resolve, reject) => {
         User.register(newUser, password, (err, user)=>{
             if(err){
@@ -91,15 +94,57 @@ function createUser(username, password, email, isAdmin=false){
     });
 }
 
-async function seedDB(){
-    await Photo.remove({});
-    console.log("Photos removed");
-    
-    await Comment.remove({});
-    console.log("Comments removed");
 
+
+async function seedDB1(){
+    await Photo.remove({});
+    await Comment.remove({});
     await User.remove({});
-    console.log("Users removed");
+    await Like.remove({});
+    await Profile.remove({});
+
+    let user = null;
+
+    try{
+        user = await createUser("root", "root", "yanghuai2012@outlook.com", true);
+        console.log("Root user created");
+
+    } catch(err){
+        console.log(err);
+        return;
+    }
+
+    comment.author.id = user._id;
+    comment.author.username = user.username;
+
+    let seed = data[0];
+
+
+    seed.author.id = user._id;
+    seed.author.username = user.username;
+
+    let thePhoto = await Photo.create(seed);
+
+    console.log("Photos created");
+
+    let theComment = await Comment.create(comment);
+    console.log("Comments created");
+
+    thePhoto.comments.push(theComment);
+
+    thePhoto.save();
+    console.log("Added comments to photos");
+      
+}
+
+
+async function seedDB(){
+    
+    await Photo.remove({});
+    await Comment.remove({});
+    await User.remove({});
+    await Like.remove({});
+    await Profile.remove({});
 
     let user = null;
 
@@ -154,4 +199,4 @@ async function seedDB(){
 
 }
  
-module.exports = seedDB;
+module.exports = seedDB1;

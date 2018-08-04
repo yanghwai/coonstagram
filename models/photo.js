@@ -21,9 +21,24 @@ const photoSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Comment"
     }],
+
+    likeCount:{
+        type: Number,
+        default: 0
+    },
+
+    favourCount:{
+        type: Number,
+        default: 0
+    },
+
     likes :[{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Like"
+    }],
+    favourites :[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Favourite"
     }]
 });
 

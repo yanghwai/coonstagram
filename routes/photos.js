@@ -6,8 +6,11 @@ const express = require("express"),
 
 
 // import models
-const Photo = require("../models/photo");
-      Like = require("../models/like");
+const Profile = require("../models/profile"),
+      Photo = require("../models/photo"),
+      Like = require("../models/like"),
+      Favourite = require("../models/favourite");
+
 
 
 require("dotenv").config();
@@ -111,26 +114,40 @@ router.get("/:id", async(req, res) => {
                                     .populate({
                                         path: "comments",
                                         options: {sort: {created: -1}}
-                                    })
-                                    .populate("likes")
-                                    .exec();
+                                    }).exec();
 
-        let hasLiked = false;
+        let isLiked = false;
+        let isFavoured = false;
+
         if(req.isAuthenticated())
         {
-            for(let like of foundPhoto.likes){
-                if(like.byWhom.id.equals(req.user._id)){
-                    hasLiked = true;
+            let currentUserProfile = await Profile.findById(req.user.profile._id)
+                                                    .populate("likes").exec();
+            // eval(require('locus'));
+            for(let like of currentUserProfile.likes){
+                if(like.photoId.equals(req.params.id)){
+                    isLiked = true;
                     break;
                 }
             }
+
+/*            for(let favour of currentUser.favourites){
+                if(favour.photoId.equals(req.params.id)){
+                    isFavoured = true;
+                    break;
+                }
+            }*/
         }
 
-        res.render("photos/show", {photo: foundPhoto, hasLiked: hasLiked});
+        res.render("photos/show", {
+            photo: foundPhoto, 
+            hasLiked: isLiked, 
+            hasFavoured: isFavoured
+        });
 
     } catch(err){
         console.log(err);
-        req.flash("warning", "Photo not found.");
+        req.flash("warning", err.message);
         return res.redirect("/photos");
     }
 
@@ -178,33 +195,30 @@ router.delete("/:id", checkPhotoOwnership, async(req, res)=>{
 });
 
 
-// ==============
-// Like Routes
-// ==============
+// ==========================
+// Like and Favourite Routes
+// ==========================
 
+// 1. CREATE Like route
 router.post("/:id/like", isLoggedIn, async(req, res)=>{
     try{
-        let thePhoto = await Photo.findById(req.params.id)
-                                    .populate("likes")
-                                    .exec();
+        let thePhoto = await Photo.findById(req.params.id).exec();
+        let currentUserProfile = await Profile.findById(req.user.profile._id)
+                                                .populate("likes").exec();
 
-        for(let like of thePhoto.likes){
-            if(like.byWhom.id.equals(req.user._id)){
-                like.remove();
-                return res.redirect("back");
-            }
-        }
-
+        // Haven't liked the photo
         let newLike = await Like.create({
-            byWhom:{
-                id: req.user._id,
-                username: req.user.username
-            }
+            userId: req.user._id,
+            photoId: thePhoto._id
         });
 
-        thePhoto.likes.push(newLike);
 
+        thePhoto.likes.push(newLike);
+        thePhoto.likeCount++;
         thePhoto.save();
+
+        currentUserProfile.likes.push(newLike);
+        currentUserProfile.save();
         return res.redirect("back");
 
     }catch(err){
@@ -213,5 +227,38 @@ router.post("/:id/like", isLoggedIn, async(req, res)=>{
         return res.redirect("back");
     }
 });
+
+
+// 2. DELETE Like route
+router.delete("/:id/like", isLoggedIn, async function deleteLike(req, res){
+    try{
+        let thePhoto = await Photo.findById(req.params.id).exec();
+        let currentUserProfile = await Profile.findById(req.user.profile._id)
+                                                .populate("likes").exec();
+
+        for(let like of currentUserProfile.likes){
+            if(like.photoId.equals(req.params.id)){
+                thePhoto.likes.pull(like._id);
+                thePhoto.likeCount--;
+                thePhoto.save();
+
+                currentUserProfile.likes.pull(like._id);
+                currentUserProfile.save();
+
+                like.remove();
+                break;
+            }
+        }
+
+        return res.redirect("back");
+
+    }catch(err){
+        console.log(err);
+        req.flash("danger", err.message);
+        return res.redirect("back");
+    }    
+});
+
+
 
 module.exports = router;

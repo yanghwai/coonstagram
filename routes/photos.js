@@ -49,10 +49,11 @@ router.get("/", async function showAllPhotos(req, res){
     let pageNumber = pageQuery? pageQuery:1;
 
     try{
-        let count = await Photo.countDocuments().exec();
-        let allPhotos = await Photo.find({}).sort("-created").skip(perPage*(pageNumber-1))
-                                            .limit(perPage)
-                                            .exec();
+        let [count, allPhotos] = await Promise.all([
+            Photo.countDocuments().exec(),
+            Photo.find({}).sort("-created").skip(perPage*(pageNumber-1))
+                                            .limit(perPage).exec()
+            ]);
 
         res.render("photos/index",{
             photos: allPhotos,

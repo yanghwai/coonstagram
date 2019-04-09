@@ -25,6 +25,7 @@ const photoRoutes = require("./routes/photos"),
 require("dotenv").config();
 
 mongoose.connect(process.env.DB_URL, {useNewUrlParser: true});
+mongoose.set("useCreateIndex", true);
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended:true}));
@@ -71,5 +72,6 @@ app.use("/photos", photoRoutes); //common route prefix
 app.use(commentRoutes);
 app.use(likeAndFavourRoutes);
 
-
-app.listen(process.env.PORT, process.env.IP, ()=>console.log("Coonstagram server started."));
+const PORT = process.env.PORT
+const IP = process.env.IP
+app.listen(PORT, IP, ()=>console.log(`Coonstagram server started on ${IP}:${PORT}`));
